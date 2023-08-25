@@ -3,10 +3,10 @@
 /*                                                        ::::::::            */
 /*   draw.c                                             :+:    :+:            */
 /*                                                     +:+                    */
-/*   By: akivioja <marvin@codam.nl>                   +#+                     */
+/*   By: akivioja <akivioja@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2023/05/01 16:32:22 by akivioja      #+#    #+#                 */
-/*   Updated: 2023/06/06 18:13:56 by akivioja      ########   odam.nl         */
+/*   Updated: 2023/08/25 17:46:55 by akivioja      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,7 +142,6 @@ void	bresenhamV3(t_slope *sval, t_fdf *data)
 	free(vs);
 }
 
-/* Works old
 void	draw(t_fdf *data)
 {
 	int	x;
@@ -155,17 +154,17 @@ void	draw(t_fdf *data)
 		while (x < data->width)
 		{
 			if (x < data->width - 1)
-				bresenhamV3(x, y, x + 1, y, data);
+				bresenham(x, y, x + 1, y, data);
 			if (y < data->height - 1)
-				bresenhamV3(x, y, x, y + 1, data);
+				bresenham(x, y, x, y + 1, data);
 			x++;
 		}
 		y++;
 	}
 }
-*/
 
-void	draw(t_fdf *data)
+
+void	drawNew(t_fdf *data)
 {
 	t_slope	*sval;
 
