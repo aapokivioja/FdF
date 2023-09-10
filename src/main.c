@@ -27,7 +27,6 @@ void	free_int_matrix(int **intmatrix)
 		current_cell = current_row[col];
 		while (current_cell != 0)
 		{
-			free(&current_cell);
 			col++;
 			current_cell = current_row[col];
 		}
@@ -83,15 +82,17 @@ t_fdf	*ft_init(t_fdf *data)
 	data->mlx_ptr = mlx_init();
 	data->win_ptr = mlx_new_window(data->mlx_ptr, 1000, 1000, "FDF");
 	data->zoom = 20;
+	data->max_value = 0;
+	data->min_value = 0;
 	return (data);
 }
 
 int	main(int argc, char **argv)
 {
-	(void)argc;
-	t_fdf *data;
+	t_fdf	*data;
 
 	data = NULL;
+	(void)argc;
 	data = ft_init(data);
 	if (!data)
 		return (0);

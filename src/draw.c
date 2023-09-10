@@ -34,21 +34,19 @@ void	isometric(float *x, float *y, int z, double angle)
 	*y = (*x + *y) * sin(angle) - z;
 }
 
-void	isometricV3(t_slope *sval, t_vs *vs, double angle, int onezero)
+unsigned int	map_value_to_color(int value, int min, int max)
 {
-	if (onezero == 0)
-	{
-		sval -> x = (sval -> x - sval -> y) * cos(angle);
-		sval -> y = (sval -> x + sval -> y) * sin(angle) - vs -> z;
-	}
-	if (onezero == 1)
-	{
-		sval -> x1 = (sval -> x1 - sval -> y1) * cos(angle);
-		sval -> y1 = (sval -> x1 + sval -> y1) * sin(angle) - vs -> z1;
-	}
+	int	red;
+	int	blue;
+	int	green;
+
+	red = 255 - (255 * (value - min)) / (max - min);
+	blue = (255 * (value - min)) / (max - min);
+	green = 0;
+	return ((red << 16) | (green << 8) | blue);
 }
 
-void	bresenham(float x, float y, float x1, float y1, t_fdf *data)
+void	bresenham(t_slope *vs, t_fdf *data)
 {
 	float	x_step;
 	float	y_step;
@@ -56,140 +54,58 @@ void	bresenham(float x, float y, float x1, float y1, t_fdf *data)
 	int		z;
 	int		z1;
 
-	z = data->int_matrix[(int)y][(int)x];
-	z1 = data->int_matrix[(int)y1][(int)x1];
-	// -- Zoom --
-	x *= data->zoom;
-	y *= data->zoom;
-	x1 *= data->zoom;
-	y1 *= data->zoom;
-	//  -- Color --
+	z = data->int_matrix[(int)(vs->y)][(int)(vs->x)];
+	z1 = data->int_matrix[(int)(vs->y1)][(int)(vs->x1)];
+	vs->x_new = vs->x * data->zoom;
+	vs->y_new = vs->y * data->zoom;
+	vs->x1_new = vs->x1 * data->zoom;
+	vs->y1_new = vs->y1 * data->zoom;
 	if (z || z1)
-		data->color = 0xffc0cb;
+		data->color = map_value_to_color(z, data->max_value, data->min_value);
 	else
 		data->color = 0xffffff;
-	// -- 3d --
-	isometric(&x, &y, z, data->angle);
-	isometric(&x1, &y1, z1, data->angle);
-	// -- Key shifts --
-
-	// Real
-	x += data->shift_x;
-	y += data->shift_y;
-	x1 += data->shift_x;
-	y1 += data->shift_y;
-	// Figure out how many steps to the left and down
-	//from a point
-	x_step = x1 - x;
-	y_step = y1 - y;
+	isometric(&(vs->x_new), &(vs->y_new), z, data->angle);
+	isometric(&(vs->x1_new), &(vs->y1_new), z1, data->angle);
+	vs->x_new = vs->x_new + data->shift_x;
+	vs->y_new = vs->y_new + data->shift_y;
+	vs->x1_new = vs->x1_new + data->shift_x;
+	vs->y1_new = vs->y1_new + data->shift_y;
+	x_step = vs->x1_new - vs->x_new;
+	y_step = vs->y1_new - vs->y_new;
 	max = max_num(mod(x_step), mod(y_step));
 	x_step /= max;
 	y_step /= max;
-	while ((int)(x - x1) || (int)(y - y1))
+	while (((int)(vs->x_new - vs->x1_new)) || ((int)(vs->y_new - vs->y1_new)))
 	{
-		mlx_pixel_put(data->mlx_ptr, data->win_ptr, x, y, data->color);
-		x += x_step;
-		y += y_step;
+		mlx_pixel_put(data->mlx_ptr, data->win_ptr, vs->x_new, vs->y_new,
+			data->color);
+		vs->x_new = vs->x_new + x_step;
+		vs->y_new = vs->y_new + y_step;
 	}
-}
-
-void	bresenhamV3(t_slope *sval, t_fdf *data)
-{
-	t_vs	*vs;
-	int		xdif;
-	int		ydif;
-
-	vs = (t_vs *)malloc(sizeof(t_vs));
-	vs -> z = data->int_matrix[(int)sval -> y][(int)sval -> x];
-	vs -> z1 = data->int_matrix[(int)sval -> y1][(int)sval -> x1];
-	// -- Zoom --
-	sval -> x *= data->zoom;
-	sval -> y *= data->zoom;
-	sval -> x1 *= data->zoom;
-	sval -> y1 *= data->zoom;
-	//  -- Color --
-	if (vs -> z || vs -> z1)
-		data->color = 0xffc0cb;
-	else
-		data->color = 0xffffff;
-	// -- 3d --
-	isometricV3(sval, vs, data->angle, 0);
-	isometricV3(sval, vs, data->angle, 1);
-	// -- Key shifts --
-
-	// Real
-	sval -> x += data->shift_x;
-	sval -> y += data->shift_y;
-	sval -> x1 += data->shift_x;
-	sval -> y1 += data->shift_y;
-	// Figure out how many steps to the left and down
-	//from a point
-	vs -> x_step = sval -> x1 - sval -> x;
-	vs -> y_step = sval -> y1 - sval -> y;
-	vs -> max = max_num(mod(vs -> x_step), mod(vs -> y_step));
-	vs -> x_step /= vs -> max;
-	vs -> y_step /= vs -> max;
-	xdif = (sval -> x - sval -> x1);
-	ydif = (sval -> y - sval -> y1);
-	while ( (int)xdif || (int)ydif)
-	{
-		mlx_pixel_put(data->mlx_ptr, data->win_ptr, sval -> x, sval -> y, data->color);
-		sval -> x += vs -> x_step;
-		sval -> y += vs -> y_step;
-		xdif = (sval -> x - sval -> x1);
-		ydif = (sval -> y - sval -> y1);
-	}
-	free(vs);
 }
 
 void	draw(t_fdf *data)
 {
-	int	x;
-	int	y;
+	t_slope	*vs;
 
-	y = 0;
-	while (y < data->height)
+	vs = NULL;
+	vs = (t_slope *)malloc(sizeof(t_slope)); // Missing a malloc check here
+	vs->y = 0;
+	while (vs->y < data->height)
 	{
-		x = 0;
-		while (x < data->width)
+		vs->x = 0;
+		while (vs->x < data->width)
 		{
-			if (x < data->width - 1)
-				bresenham(x, y, x + 1, y, data);
-			if (y < data->height - 1)
-				bresenham(x, y, x, y + 1, data);
-			x++;
+			if (vs->x < data->width - 1)
+				vs->x1 = vs->x + 1;
+			vs->y1 = vs->y;
+			bresenham(vs, data);
+			if (vs->y < data->height - 1)
+				vs->y1 = vs->y + 1;
+			vs->x1 = vs->x;
+			bresenham(vs, data);
+			vs->x = vs->x + 1;
 		}
-		y++;
+		vs->y = vs->y + 1;
 	}
-}
-
-
-void	drawNew(t_fdf *data)
-{
-	t_slope	*sval;
-
-	sval = (t_slope *)malloc(sizeof(t_slope));
-	sval -> y = 0;
-	while (sval -> y < data->height)
-	{
-		sval -> x = 0;
-		while (sval -> x < data->width)
-		{
-			if (sval -> x < data->width - 1)
-			{
-				sval -> x1 = sval -> x + 1;
-				sval -> y1 = sval -> y;
-				bresenhamV3(sval, data);
-			}
-			if (sval -> y < data->height - 1)
-			{
-				sval -> x1 = sval -> x;
-				sval -> y1 = sval -> y + 1;
-				bresenhamV3(sval, data);
-			}
-			sval -> x++;
-		}
-		sval -> y++;
-	}
-	free(sval);
 }

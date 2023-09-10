@@ -15,10 +15,8 @@
 char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
 	size_t			str_l;
-	size_t			sub_count;
 	char			*sub_str;
 
-	sub_count = 0;
 	str_l = ft_strlen(s);
 	if (str_l - start < len)
 		len = str_l - start;

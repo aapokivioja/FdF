@@ -59,12 +59,6 @@ int	get_width(char *filename)
 	fd = open(filename, O_RDONLY, 0);
 	line = get_next_line(fd);
 	width = count_words(line);
-	/*This while loops fixes a weird problem where
-	gnl remembers it alredy read the first line
-	-> causes an issue later on when The whole file needs to be read again
-	-> Starts from second line bcs 1 is already read
-	-> Now we read all the lines again
-	*/
 	while (line)
 		line = get_next_line(fd);
 	free(line);
@@ -72,16 +66,22 @@ int	get_width(char *filename)
 	return (width);
 }
 
-void	fill_matrix(int *row, char *line)
+void	fill_matrix(int *row, char *line, t_fdf *data)
 {
 	char	**nums;
 	int		index;
+	int		num;
 
 	nums = ft_split(line, ' ');
 	index = 0;
 	while (nums[index])
 	{
-		row[index] = ft_atoi(nums[index]);
+		num = ft_atoi(nums[index]);
+		row[index] = num;
+		if (num < data->min_value)
+			data->min_value = num;
+		else if (num > data->max_value)
+			data->max_value = num;
 		free(nums[index]);
 		index++;
 	}
@@ -90,17 +90,14 @@ void	fill_matrix(int *row, char *line)
 
 void	parse(char *filename, t_fdf *data)
 {
-	int index;
-	int fd;
-	char *line;
+	int		index;
+	int		fd;
+	char	*line;
 
 	data->height = get_height(filename);
 	data->width = get_width(filename);
-
-	//malloc room for all columns
 	data->int_matrix = (int **)malloc(sizeof(int *) * (data->height + 1));
 	index = 0;
-	//malloc room for all rows
 	while (index <= data->height)
 		data->int_matrix[index++] = (int *)malloc(sizeof(int) * (data->width
 					+ 1));
@@ -109,7 +106,7 @@ void	parse(char *filename, t_fdf *data)
 	index = 0;
 	while (line)
 	{
-		fill_matrix(data->int_matrix[index], line);
+		fill_matrix(data->int_matrix[index], line, data);
 		line = get_next_line(fd);
 		index++;
 	}

@@ -39,6 +39,8 @@ typedef struct t_fdf
 	int		shift_x;
 	int		shift_y;
 	double	angle;
+	int		max_value;
+	int		min_value;
 
 	void	*mlx_ptr;
 	void	*win_ptr;
@@ -50,6 +52,11 @@ typedef struct t_slope
 	float	y;
 	float	x1;
 	float	y1;
+
+	float	x_new;
+	float	y_new;
+	float	x1_new;
+	float	y1_new;
 }			t_slope;
 
 typedef struct t_vittusaatana
@@ -59,10 +66,10 @@ typedef struct t_vittusaatana
 	int		max;
 	int		z;
 	int		z1;
-}	t_vs;
+}			t_vs;
 
 void		parse(char *filename, t_fdf *data);
-void	bresenham(float x, float y, float x1, float y1, t_fdf *data);
 void		draw(t_fdf *data);
+void		bresenham(t_slope *vs, t_fdf *data);
 
 #endif
