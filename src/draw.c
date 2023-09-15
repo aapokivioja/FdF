@@ -6,27 +6,11 @@
 /*   By: akivioja <akivioja@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2023/05/01 16:32:22 by akivioja      #+#    #+#                 */
-/*   Updated: 2023/08/25 17:46:55 by akivioja      ########   odam.nl         */
+/*   Updated: 2023/09/15 17:07:17 by akivioja      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/fdf.h"
-
-float	mod(float i)
-{
-	if (i < 0)
-		return (-i);
-	else
-		return (i);
-}
-
-int	max_num(int a, int b)
-{
-	if (a > b)
-		return (a);
-	else
-		return (b);
-}
 
 void	isometric(float *x, float *y, int z, double angle)
 {
@@ -46,16 +30,8 @@ unsigned int	map_value_to_color(int value, int min, int max)
 	return ((red << 16) | (green << 8) | blue);
 }
 
-void	bresenham(t_slope *vs, t_fdf *data)
+void	bresenham_helper(t_slope *vs, t_fdf *data, int z, int z1)
 {
-	float	x_step;
-	float	y_step;
-	int		max;
-	int		z;
-	int		z1;
-
-	z = data->int_matrix[(int)(vs->y)][(int)(vs->x)];
-	z1 = data->int_matrix[(int)(vs->y1)][(int)(vs->x1)];
 	vs->x_new = vs->x * data->zoom;
 	vs->y_new = vs->y * data->zoom;
 	vs->x1_new = vs->x1 * data->zoom;
@@ -70,6 +46,19 @@ void	bresenham(t_slope *vs, t_fdf *data)
 	vs->y_new = vs->y_new + data->shift_y;
 	vs->x1_new = vs->x1_new + data->shift_x;
 	vs->y1_new = vs->y1_new + data->shift_y;
+}
+
+void	bresenham(t_slope *vs, t_fdf *data)
+{
+	float	x_step;
+	float	y_step;
+	int		max;
+	int		z;
+	int		z1;
+
+	z = data->int_matrix[(int)(vs->y)][(int)(vs->x)];
+	z1 = data->int_matrix[(int)(vs->y1)][(int)(vs->x1)];
+	bresenham_helper(vs, data, z, z1);
 	x_step = vs->x1_new - vs->x_new;
 	y_step = vs->y1_new - vs->y_new;
 	max = max_num(mod(x_step), mod(y_step));
@@ -89,7 +78,9 @@ void	draw(t_fdf *data)
 	t_slope	*vs;
 
 	vs = NULL;
-	vs = (t_slope *)malloc(sizeof(t_slope)); // Missing a malloc check here
+	vs = (t_slope *)malloc(sizeof(t_slope));
+	if (!vs)
+		close_window(data);
 	vs->y = 0;
 	while (vs->y < data->height)
 	{
@@ -108,4 +99,5 @@ void	draw(t_fdf *data)
 		}
 		vs->y = vs->y + 1;
 	}
+	free(vs);
 }

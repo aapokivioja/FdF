@@ -1,20 +1,18 @@
 NAME = fdf
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -fsanitize=address
-
+CFLAGS = -Wall -Wextra -Werror
 SRC_PATH    = src/
 OBJ_PATH    = obj/
 
 LIBFT = libft/libft.a
-PRINTF = ft_printf/ft_printf.a
 GNL = gnl/gnl.a
 
 LIBS = -L./minilibx_macos -lmlx -framework OpenGL -framework AppKit
 
 SRC = \
-	fdf.c \
 	parse.c \
 	draw.c \
+	draw_helper.c \
 	main.c
 
 SRCS        = $(addprefix $(SRC_PATH), $(SRC))
@@ -34,20 +32,17 @@ $(OBJ_PATH):
 
 $(NAME): $(OBJS)
 	$(MAKE) all -C libft
-	$(MAKE) all -C ft_printf
 	$(MAKE) all -C gnl
-	$(CC) $(CFLAGS) $(OBJS) -o $(NAME) $(LIBFT) $(PRINTF) $(GNL) $(LIBS)
+	$(CC) $(CFLAGS) $(OBJS) -o $(NAME) $(LIBFT) $(GNL) $(LIBS)
 
 clean:
 	rm -rf $(OBJ_PATH)
 	$(MAKE) clean -C libft
-	$(MAKE) clean -C ft_printf
 	$(MAKE) clean -C gnl
 
 fclean: clean
 	rm -f $(NAME)
 	$(MAKE) fclean -C libft
-	$(MAKE) fclean -C ft_printf
 	$(MAKE) fclean -C gnl
 
 re: fclean all

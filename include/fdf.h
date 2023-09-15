@@ -3,10 +3,10 @@
 /*                                                        ::::::::            */
 /*   fdf.h                                              :+:    :+:            */
 /*                                                     +:+                    */
-/*   By: akivioja <marvin@codam.nl>                   +#+                     */
+/*   By: akivioja <akivioja@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2023/04/24 17:50:55 by akivioja      #+#    #+#                 */
-/*   Updated: 2023/06/06 17:33:06 by akivioja      ########   odam.nl         */
+/*   Updated: 2023/09/15 17:26:41 by akivioja      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@
 # define WIDTH 1920
 # define MENU_WIDTH 250
 
-# include "../ft_printf/ft_printf.h"
 # include "../gnl/get_next_line.h"
 # include "../libft/libft.h"
 # include "../minilibx_macos/mlx.h"
@@ -59,17 +58,13 @@ typedef struct t_slope
 	float	y1_new;
 }			t_slope;
 
-typedef struct t_vittusaatana
-{
-	float	x_step;
-	float	y_step;
-	int		max;
-	int		z;
-	int		z1;
-}			t_vs;
-
 void		parse(char *filename, t_fdf *data);
 void		draw(t_fdf *data);
 void		bresenham(t_slope *vs, t_fdf *data);
+float		mod(float i);
+int			max_num(int a, int b);
+int			close_window(t_fdf *data);
+int			get_height(char *filename);
+int			get_width(char *filename);
 
 #endif

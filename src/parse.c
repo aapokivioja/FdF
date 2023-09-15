@@ -3,10 +3,10 @@
 /*                                                        ::::::::            */
 /*   parse.c                                            :+:    :+:            */
 /*                                                     +:+                    */
-/*   By: akivioja <marvin@codam.nl>                   +#+                     */
+/*   By: akivioja <akivioja@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2023/04/28 18:31:35 by akivioja      #+#    #+#                 */
-/*   Updated: 2023/06/06 13:54:14 by akivioja      ########   odam.nl         */
+/*   Updated: 2023/09/15 17:28:13 by akivioja      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,10 @@ int	get_height(char *filename)
 	line = get_next_line(fd);
 	while (line)
 	{
+		free(line);
 		height++;
 		line = get_next_line(fd);
 	}
-	free(line);
 	close(fd);
 	return (height);
 }
@@ -60,8 +60,10 @@ int	get_width(char *filename)
 	line = get_next_line(fd);
 	width = count_words(line);
 	while (line)
+	{
+		free(line);
 		line = get_next_line(fd);
-	free(line);
+	}
 	close(fd);
 	return (width);
 }
@@ -90,27 +92,29 @@ void	fill_matrix(int *row, char *line, t_fdf *data)
 
 void	parse(char *filename, t_fdf *data)
 {
-	int		index;
+	int		i;
 	int		fd;
 	char	*line;
 
-	data->height = get_height(filename);
-	data->width = get_width(filename);
 	data->int_matrix = (int **)malloc(sizeof(int *) * (data->height + 1));
-	index = 0;
-	while (index <= data->height)
-		data->int_matrix[index++] = (int *)malloc(sizeof(int) * (data->width
-					+ 1));
+	if (!(data->int_matrix))
+		close_window(data);
+	i = 0;
+	while (i < data->height)
+	{
+		data->int_matrix[i++] = (int *)malloc(sizeof(int) *(data->width));
+		if (!(data->int_matrix[i - 1]))
+			close_window(data);
+	}
 	fd = open(filename, O_RDONLY, 0);
 	line = get_next_line(fd);
-	index = 0;
+	i = 0;
 	while (line)
 	{
-		fill_matrix(data->int_matrix[index], line, data);
+		fill_matrix(data->int_matrix[i], line, data);
+		free(line);
 		line = get_next_line(fd);
-		index++;
+		i++;
 	}
-	free(line);
 	close(fd);
-	data->int_matrix[index] = NULL;
 }
